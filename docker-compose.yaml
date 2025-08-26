@@ -1,0 +1,32 @@
+version: '3.8'  # Явное указание версии формата
+
+services:
+  db:
+    image: postgres:17
+    container_name: delivery_postgres_db  # Явное имя контейнера для удобства
+    restart: unless-stopped  # Автоматический перезапуск при падении
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres  # Рекомендую заменить на более сложный пароль
+      POSTGRES_DB: delivery_db_1
+      POSTGRES_HOST_AUTH_METHOD: md5  # Более безопасный метод аутентификации
+      TZ: Europe/Moscow  # Установка временной зоны (укажите свою)
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:  # Проверка здоровья контейнера
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db-1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend_network  # Изолированная сеть для безопасности
+
+volumes:
+  postgres_data:
+    name: postgres_data_volume  # Явное имя volume
+
+networks:
+  backend_network:
+    driver: bridge
